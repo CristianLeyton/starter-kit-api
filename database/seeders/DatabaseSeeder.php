@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +17,43 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Create default roles
+        $adminRole = Role::create(['name' => 'admin']);
+        $editorRole = Role::create(['name' => 'editor']);
+        $userRole = Role::create(['name' => 'user']);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Create default permissions
+        Permission::create(['name' => 'view panel']);
+        Permission::create(['name' => 'manage users']);
+        Permission::create(['name' => 'manage roles']);
+        Permission::create(['name' => 'manage permissions']);
+
+        // Assign permissions to roles
+        $adminRole->givePermissionTo(Permission::all());
+        $editorRole->givePermissionTo('view panel');
+
+        // Create default users
+        $admin = User::create([
+            'name' => 'Admin',
+            'email' => 'admin@mail.com',
+            'password' => bcrypt('admin'),
         ]);
+        $admin->assignRole('admin');
+
+        // Create editor user
+        $editor = User::create([
+            'name' => 'Editor',
+            'email' => 'editor@mail.com',
+            'password' => bcrypt('editor'),
+        ]);
+        $editor->assignRole('editor');
+
+        // Create regular user
+        $user = User::create([
+            'name' => 'Regular User',
+            'email' => 'user@mail.com',
+            'password' => bcrypt('user'),
+        ]);
+        $user->assignRole('user');
     }
 }
