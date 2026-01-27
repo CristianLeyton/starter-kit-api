@@ -18,6 +18,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Auth\CustomLogin;
+use App\Filament\Resources\Users\Pages\EditProfile;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -25,13 +27,15 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->profile(isSimple: false)
+            ->profile(isSimple: false, page: EditProfile::class)
             ->id('admin')
             ->passwordReset()
             ->emailChangeVerification()
             ->spa(hasPrefetching: true)
             ->path('admin')
-            ->login()
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->login(CustomLogin::class)
+            ->unsavedChangesAlerts()
             ->colors([
                 'primary' => Color::Zinc,
             ])

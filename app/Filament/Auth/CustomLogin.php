@@ -1,36 +1,49 @@
 <?php
 
 namespace App\Filament\Auth;    
-use Filament\Pages\Auth\Login;
+use Filament\Auth\Pages\Login;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Component;
+use Illuminate\Validation\ValidationException;
 
 class CustomLogin extends Login
 {
 
-
-
-        protected function getEmailFormComponent(): \Filament\Schemas\Components\Component
+        public function form(Schema $schema): Schema
     {
-        return TextInput::make('username')
-            ->label(__('Usuario / Correo'))
+        return $schema
+            ->components([
+                $this->getLoginFormComponent(),
+                $this->getPasswordFormComponent(),
+                $this->getRememberFormComponent(),
+            ]);
+    }
+
+        protected function getLoginFormComponent(): Component
+    {
+        return TextInput::make('login')
+            ->label('Usuario/Correo')
             ->required()
             ->autocomplete()
-            ->autofocus()
-            ->extraInputAttributes(['tabindex' => 1]);
+            ->autofocus();
     }
 
     protected function getCredentialsFromFormData(array $data): array
     {
+
+        $login_type = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
         return [
-            'username' => $data['username'] ?? null,
-            'password' => $data['password'] ?? null,
+            $login_type => $data['login'],
+            'password' => $data['password'],
         ];
     }
 
     protected function throwFailureValidationException(): never
     {
-        throw \Illuminate\Validation\ValidationException::withMessages([
-            'data.username' => __('filament-panels::auth/pages/login.messages.failed'),
+        throw ValidationException::withMessages([
+            'data.login' => __('filament-panels::auth/pages/login.messages.failed'),
         ]);
     }
 }
