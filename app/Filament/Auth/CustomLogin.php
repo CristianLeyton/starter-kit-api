@@ -1,16 +1,19 @@
 <?php
 
-namespace App\Filament\Auth;    
+namespace App\Filament\Auth;
+
 use Filament\Auth\Pages\Login;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Component;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Blade;
 
 class CustomLogin extends Login
 {
 
-        public function form(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
@@ -20,7 +23,7 @@ class CustomLogin extends Login
             ]);
     }
 
-        protected function getLoginFormComponent(): Component
+    protected function getLoginFormComponent(): Component
     {
         return TextInput::make('login')
             ->label('Usuario/Correo')
@@ -46,4 +49,5 @@ class CustomLogin extends Login
             'data.login' => __('filament-panels::auth/pages/login.messages.failed'),
         ]);
     }
+
 }
