@@ -140,7 +140,8 @@ class UserResource extends Resource
             ->recordClasses(fn($record) => $record->id === 1 ? 'bg-gray-100 opacity-70 dark:bg-gray-800' : '')
             ->recordAction(null)
             ->filters([
-                /* TrashedFilter::make(), */])
+                TrashedFilter::make(),
+            ])
             ->hiddenFilterIndicators()
             ->deferFilters(false)
             ->recordActions([
