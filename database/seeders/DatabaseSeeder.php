@@ -17,59 +17,46 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create default roles (admin, vendedor, cliente; keep editor/user for compatibility)
-        $roles = ['admin', 'editor', 'user', 'vendedor', 'cliente'];
-        foreach ($roles as $name) {
-            Role::firstOrCreate(['name' => $name]);
-        }
-        $adminRole = Role::where('name', 'admin')->first();
-        $editorRole = Role::where('name', 'editor')->first();
+        // Create default roles
+        $adminRole = Role::create(['name' => 'admin']);
+        $editorRole = Role::create(['name' => 'editor']);
+        $userRole = Role::create(['name' => 'user']);
 
         // Create default permissions
-        $permissions = ['view panel', 'manage users', 'manage roles', 'manage permissions'];
-        foreach ($permissions as $name) {
-            Permission::firstOrCreate(['name' => $name]);
-        }
+        Permission::create(['name' => 'view panel']);
+        Permission::create(['name' => 'manage users']);
+        Permission::create(['name' => 'manage roles']);
+        Permission::create(['name' => 'manage permissions']);
+
+        // Assign permissions to roles
         $adminRole->givePermissionTo(Permission::all());
-        $editorRole->syncPermissions(['view panel']);
+        $editorRole->givePermissionTo('view panel');
 
         // Create default users
-        $admin = User::firstOrCreate(
-            ['username' => 'admin'],
-            [
-                'name' => 'Admin',
-                'email' => 'admin@mail.com',
-                'password' => bcrypt('admin'),
-            ]
-        );
-        if (! $admin->hasRole('admin')) {
-            $admin->assignRole('admin');
-        }
+        $admin = User::create([
+            'name' => 'Admin',
+            'username' => 'admin',
+            'email' => 'admin@mail.com',
+            'password' => bcrypt('admin'),
+        ]);
+        $admin->assignRole('admin');
 
-        $editor = User::firstOrCreate(
-            ['username' => 'editor'],
-            [
-                'name' => 'Editor',
-                'email' => 'editor@mail.com',
-                'password' => bcrypt('editor'),
-            ]
-        );
-        if (! $editor->hasRole('editor')) {
-            $editor->assignRole('editor');
-        }
+        // Create editor user
+        $editor = User::create([
+            'name' => 'Editor',
+            'username' => 'editor',
+            'email' => 'editor@mail.com',
+            'password' => bcrypt('editor'),
+        ]);
+        $editor->assignRole('editor');
 
-        $user = User::firstOrCreate(
-            ['username' => 'user'],
-            [
-                'name' => 'Regular User',
-                'email' => 'user@mail.com',
-                'password' => bcrypt('user'),
-            ]
-        );
-        if (! $user->hasRole('user')) {
-            $user->assignRole('user');
-        }
-
-        $this->call(DemoFrigorificaSeeder::class);
+        // Create regular user
+        $user = User::create([
+            'name' => 'Regular User',
+            'username' => 'user',
+            'email' => 'user@mail.com',
+            'password' => bcrypt('user'),
+        ]);
+        $user->assignRole('user');
     }
 }

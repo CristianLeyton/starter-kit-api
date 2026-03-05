@@ -29,15 +29,15 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->profile(isSimple: false, page: EditProfile::class)
             ->id('admin')
-            /* ->passwordReset()
-            ->emailChangeVerification() */
+            ->passwordReset()
+            ->emailChangeVerification()
             ->spa(hasPrefetching: true)
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login(CustomLogin::class)
             ->unsavedChangesAlerts()
             ->colors([
-                'primary' => Color::Sky,
+                'primary' => Color::Zinc,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
