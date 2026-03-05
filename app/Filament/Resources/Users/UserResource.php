@@ -49,7 +49,7 @@ class UserResource extends Resource
                     ->minLength(3)
                     ->maxLength(255)
                     ->required()
-                    ->unique()
+                    ->unique(ignoreRecord: true)
                     ->validationMessages([
                         'min' => 'El nombre de usuario debe tener al menos :min caracteres.',
                         'required' => 'El nombre de usuario es obligatorio.',
@@ -77,7 +77,7 @@ class UserResource extends Resource
                     ->label('Correo')
                     ->email()
                     ->nullable()
-                    ->unique()
+                    ->unique(ignoreRecord: true)
                     ->validationMessages([
                         'unique' => 'El correo ya está en uso.',
                     ]),
@@ -90,17 +90,27 @@ class UserResource extends Resource
                     )
                     ->getOptionLabelFromRecordUsing(function ($record) {
                         return match ($record->name) {
-                            'admin'  => 'Administrador',
-                            'editor' => 'Editor',
-                            'user'   => 'Usuario',
-                            default  => ucfirst($record->name),
+                            'admin'     => 'Administrador',
+                            'editor'    => 'Editor',
+                            'user'      => 'Usuario',
+                            'vendedor'  => 'Vendedor',
+                            'cliente'   => 'Cliente',
+                            default     => ucfirst($record->name),
                         };
                     })
                     ->required()
                     ->native(false)
                     ->validationMessages([
                         'required' => 'El campo rol es obligatorio.',
-                    ]),
+                    ])
+                    ->live(),
+                Select::make('client_id')
+                    ->label('Cliente (solo para rol Cliente)')
+                    ->relationship('client', 'descripcion')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->descripcion . ' (#' . $record->numero . ')')
+                    ->searchable()
+                    ->preload()
+                    ->visible(fn ($get) => \Spatie\Permission\Models\Role::firstWhere('name', 'cliente')?->id && $get('rol') == \Spatie\Permission\Models\Role::firstWhere('name', 'cliente')?->id),
             ]);
     }
 
@@ -132,10 +142,19 @@ class UserResource extends Resource
                             'admin' => 'info',
                             'editor' => 'success',
                             'user' => 'gray',
+                            'vendedor' => 'warning',
+                            'cliente' => 'success',
                             default => 'gray',
                         }
                     )
-                    ->formatStateUsing(fn($state) => ucfirst($state)),
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'admin' => 'Administrador',
+                        'editor' => 'Editor',
+                        'user' => 'Usuario',
+                        'vendedor' => 'Vendedor',
+                        'cliente' => 'Cliente',
+                        default => ucfirst($state ?? ''),
+                    }),
             ])
             ->recordClasses(fn($record) => $record->id === 1 ? 'bg-gray-100 opacity-70 dark:bg-gray-800' : '')
             ->recordAction(null)
@@ -199,5 +218,10 @@ class UserResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasRole('admin');
     }
 }

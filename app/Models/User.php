@@ -30,6 +30,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'lastname',
         'email',
         'password',
+        'client_id',
     ];
 
     /**
@@ -57,6 +58,14 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return ($this->hasRole('admin') || $this->hasRole('editor'));
+        return $this->hasRole('admin')
+            || $this->hasRole('editor')
+            || $this->hasRole('vendedor')
+            || $this->hasRole('cliente');
+    }
+
+    public function client(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Client::class);
     }
 }
